@@ -57,7 +57,7 @@ import { OmniRoute } from "@minix/omniroute-sdk";
 
 const client = new OmniRoute({
   apiKey: process.env.OMNIROUTE_API_KEY,
-  baseURL: "http://10.0.0.110:20128/v1" // or your deployed gateway
+  baseURL: "http://10.0.0.110:20128/v1"
 });
 
 // Streaming chat completion
@@ -192,24 +192,12 @@ curl -H "Authorization: Bearer $OMNIROUTE_API_KEY" http://10.0.0.110:20128/api/p
 ## Architecture
 
 ```
-┌─────────────┐     HTTPS      ┌──────────────────┐
-│   Client    │ ─────────────► │   OmniRoute      │  (Go, ~200 LOC core)
-│  (TS/Py/Go) │  OpenAI compat │   Gateway        │
-└─────────────┘                │  10.0.0.110:20128│
-                               └────────┬─────────┘
-                                        │
-        ┌───────────────────────────────┼───────────────────────────────┐
-        ▼                               ▼                               ▼
-   ┌─────────┐                     ┌─────────┐                     ┌─────────┐
-   │ NVIDIA  │                     │Fireworks│                     │  Groq   │
-   │ Nemotron│                     │ DeepSeek│                     │  Llama  │
-   └─────────┘                     └─────────┘                     └─────────┘
-        │                               │                               │
-        ▼                               ▼                               ▼
-   ┌─────────┐                     ┌─────────┐                     ┌─────────┐
-   │  xAI    │                     │ Google  │                     │DeepInfra│
-   │  Grok   │                     │ Gemini  │                     │  50+    │
-   └─────────┘                     └─────────┘                     └─────────┘
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Your App   │ ──► │ OmniRoute    │ ──► │ 16 Providers│
+│  (TS/Py/Go) │     │ Gateway      │     │ (NVIDIA,    │
+└─────────────┘     │ :20128/v1    │     │  Fireworks, │
+                    │ Auto-router  │     │  Groq, etc.)│
+                    └──────────────┘     └─────────────┘
 ```
 
 ## License
